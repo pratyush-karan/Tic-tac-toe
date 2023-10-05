@@ -12,11 +12,14 @@ export default function Home() {
   const [player, setPlayer] = useState(1);
   const [gameDisable, setGameDisable] = useState(false);
   const [score, setScore] = useState({ player1: 0, player2: 0 });
+  const [moves, setMoves] = useState(0);
+  const [draw, setDraw] = useState(false);
 
   const handleSelect = (r, c) => {
     const copy = [...game];
     if (copy[r][c] === 0) {
       copy[r][c] = player;
+      setMoves((prev) => prev + 1);
       setGame(copy);
       checkPlayerWon().then(() => setPlayer((prev) => (prev === 1 ? 2 : 1)));
     } else {
@@ -91,6 +94,13 @@ export default function Home() {
         reject();
       }
 
+      console.log(moves);
+      //checkDraw
+      if (moves === 8 && !gameDisable) {
+        setGameDisable(true);
+        reject();
+        setDraw(true);
+      }
       resolve();
     });
   };
@@ -99,12 +109,17 @@ export default function Home() {
     setGame(initialValues);
     setPlayer(1);
     setGameDisable(false);
+    setMoves(0);
   };
 
   return (
     <>
       <div className="container">
-        {gameDisable && <div className="float">Player {player} Won</div>}
+        {gameDisable && (
+          <div className="float">
+            {!draw ? ` Player ${player} Won ` : `Match Draw`}
+          </div>
+        )}
         <div className="score">
           <span>Player1 Score:</span> {score.player1}
         </div>

@@ -1,0 +1,22 @@
+.game-container {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  width: 180px;
+  margin: 10rem auto;
+}
+
+.box {
+  flex: 1 1 33.3%;
+  height: 60px;
+}
+
+.btn {
+  height: 100%;
+  width: 100%;
+  cursor: pointer;
+  &[disabled] {
+    color: red;
+    cursor: auto;
+  }
+}
