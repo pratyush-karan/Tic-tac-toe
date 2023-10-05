@@ -1,0 +1,38 @@
+.container {
+  margin-top: 10rem;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  .game {
+    display: flex;
+  }
+  .score {
+    display: flex;
+    flex-direction: column;
+  }
+}
+.float {
+  position: absolute;
+  float: left;
+  color: red;
+  font-size: large;
+}
+
+.game-row {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.btn-custom {
+  height: 50px;
+  width: 50px;
+  cursor: pointer;
+}
+
+.another-round {
+  margin-top: 5rem;
+  display: flex;
+  justify-content: center;
+}
