@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import "./optimized.scss";
+import "./landingPage.scss";
 
 const TicTacToe = () => {
   const initialValues = [0, 0, 0, 0, 0, 0, 0, 0, 0];
