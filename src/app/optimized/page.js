@@ -6,18 +6,17 @@ const OptimizedPage = () => {
   const initialValues = [0, 0, 0, 0, 0, 0, 0, 0, 0];
   const [game, setGame] = useState(initialValues);
   const [player, setPlayer] = useState(1);
-  const [gameStatus, setGameStatus] = useState({
-    gameOver: false,
-    playerWon: false,
-  });
-  const [chancesPlayed, setChancesPlayed] = useState([]);
+  const [gameOver, setGameOver] = useState(false);
+  const [draw, setDraw] = useState(false);
+  const [chancesPlayed, setChancesPlayed] = useState(0);
+  const [scores, setScores] = useState({ player1: 0, player2: 0 });
 
   const handleSelect = (e, i) => {
     if (!game[i]) {
       const copy = [...game];
       copy[i] = player === 1 ? "X" : "O";
       setGame(copy);
-      let chances = [...chancesPlayed];
+      let chances = chancesPlayed ? [...chancesPlayed] : [];
       chances.push(i);
       setChancesPlayed(chances);
     }
@@ -46,47 +45,72 @@ const OptimizedPage = () => {
   };
 
   const checkDisabled = (e) => {
-    if (e) return true;
+    if (e || gameOver) return true;
     else return false;
   };
 
   useEffect(() => {
-    if (chancesPlayed.length) {
-      console.log(checkIfPlayerWon());
-      //   if (checkIfPlayerWon()) {
-      //     setGameStatus((prev) => {
-      //       prev.gameOver = true;
-      //       prev.playerWon = true;
-      //       return prev;
-      //     });
-      //   } else {
-      //     setPlayer((prev) => (prev === 1 ? 2 : 1));
-      //   }
+    if (!!chancesPlayed.length) {
+      if (checkIfPlayerWon()) {
+        setScores((prev) => {
+          prev[`player${player}`]++;
+          return prev;
+        });
+        setGameOver(true);
+      } else {
+        if (chancesPlayed?.length === 9) {
+          setGameOver(true);
+          setDraw(true);
+        } else {
+          setPlayer((prev) => (prev === 1 ? 2 : 1));
+        }
+      }
     }
-  }, [chancesPlayed]);
+  }, [game]);
+
+  const handleStartAgain = () => {
+    setGame(initialValues);
+    setGameOver(false);
+    setDraw(false);
+    setChancesPlayed(0);
+    setPlayer(1);
+  };
 
   return (
     <>
-      {/* {console.log(game)} */}
-      {console.log(chancesPlayed)}
       <div className="game-container">
-        {game.map((e, i) => (
-          <div className="box" key={i}>
-            <button
-              className="btn"
-              onClick={() => handleSelect(e, i)}
-              disabled={checkDisabled(e)}
-            >
-              {!!game[i] && game[i]}
-            </button>
-          </div>
-        ))}
+        <div className="scores">Player 1 Score : {scores.player1}</div>
+        <div className="game">
+          {game.map((e, i) => (
+            <div className="box" key={i}>
+              <button
+                className="btn-game"
+                onClick={() => handleSelect(e, i)}
+                disabled={checkDisabled(e)}
+              >
+                {!!game[i] && game[i]}
+              </button>
+            </div>
+          ))}
+        </div>
+
+        <div className="scores">Player 2 Score : {scores.player2}</div>
       </div>
-      {gameStatus.gameOver && (
-        <div>
-          {gameStatus.playerWon ? `Player ${player} Won` : `Game is Draw`}
+      {gameOver && (
+        <div className="game-result">
+          {!draw ? `Player ${player} Won` : `Game is Draw`}
         </div>
       )}
+      <div className="options">
+        <div>
+          <button className="btn-options">Redo</button>
+        </div>
+        <div>
+          <button className="btn-options" onClick={handleStartAgain}>
+            Go Again
+          </button>
+        </div>
+      </div>
     </>
   );
 };
