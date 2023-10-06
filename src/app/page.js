@@ -1,154 +1,137 @@
 "use client";
-import "./landingPage.scss";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
+import "./optimized.scss";
 
-export default function Home() {
-  const initialValues = [
-    [0, 0, 0],
-    [0, 0, 0],
-    [0, 0, 0],
-  ];
+const TicTacToe = () => {
+  const initialValues = [0, 0, 0, 0, 0, 0, 0, 0, 0];
   const [game, setGame] = useState(initialValues);
   const [player, setPlayer] = useState(1);
-  const [gameDisable, setGameDisable] = useState(false);
-  const [score, setScore] = useState({ player1: 0, player2: 0 });
-  const [moves, setMoves] = useState(0);
+  const [gameOver, setGameOver] = useState(false);
   const [draw, setDraw] = useState(false);
+  const [chancesPlayed, setChancesPlayed] = useState(0);
+  const [scores, setScores] = useState({ player1: 0, player2: 0 });
 
-  const handleSelect = (r, c) => {
-    const copy = [...game];
-    if (copy[r][c] === 0) {
-      copy[r][c] = player;
-      setMoves((prev) => prev + 1);
+  const handleSelect = (i) => {
+    if (!game[i]) {
+      const copy = [...game];
+      copy[i] = player === 1 ? "X" : "O";
       setGame(copy);
-      checkPlayerWon().then(() => setPlayer((prev) => (prev === 1 ? 2 : 1)));
-    } else {
-      alert("Already Selected");
+      let chances = chancesPlayed ? [...chancesPlayed] : [];
+      chances.push(i);
+      setChancesPlayed(chances);
     }
   };
 
-  const displayItem = (value) => {
-    switch (value) {
-      case 1:
-        return "X";
-      case 2:
-        return "O";
-      default:
-        return "";
+  const checkIfPlayerWon = () => {
+    //for horizhontal
+    let combi;
+    for (let i = 0; i <= 6; i = i + 3) {
+      combi = `${game[i]}${game[i + 1]}${game[i + 2]}`;
+      if (combi === "XXX" || combi === "OOO") return true;
     }
+
+    //for vertical
+    for (let i = 0; i <= 2; i++) {
+      combi = `${game[i]}${game[i + 3]}${game[i + 6]}`;
+      if (combi === "XXX" || combi === "OOO") return true;
+    }
+
+    //for diagonal
+    combi = `${game[0]}${game[4]}${game[8]}`;
+    if (combi === "XXX" || combi === "OOO") return true;
+    combi = `${game[2]}${game[4]}${game[6]}`;
+    if (combi === "XXX" || combi === "OOO") return true;
+    return false;
   };
 
-  const checkPlayerWon = () => {
-    return new Promise((resolve, reject) => {
-      //checkhorizhontal condition
-      for (let i = 0; i <= 2; i++) {
-        if (
-          game[i][0] === game[i][1] &&
-          game[i][1] === game[i][2] &&
-          game[i][0] !== 0
-        ) {
-          let copy = { ...score };
-          copy[`player${player}`]++;
-          setScore(copy);
-          setGameDisable(true);
-          reject();
-        }
-      }
-
-      //check vertical condition
-      for (let i = 0; i <= 2; i++) {
-        if (
-          game[0][i] === game[1][i] &&
-          game[1][i] === game[2][i] &&
-          game[0][i] !== 0
-        ) {
-          let copy = { ...score };
-          copy[`player${player}`]++;
-          setScore(copy);
-          setGameDisable(true);
-          reject();
-        }
-      }
-
-      //check diagonal condition
-      if (
-        game[0][0] === game[1][1] &&
-        game[1][1] === game[2][2] &&
-        game[0][0] !== 0
-      ) {
-        let copy = { ...score };
-        copy[`player${player}`]++;
-        setScore(copy);
-        setGameDisable(true);
-        reject();
-      }
-      if (
-        game[0][2] === game[1][1] &&
-        game[1][1] === game[2][0] &&
-        game[0][2] !== 0
-      ) {
-        let copy = { ...score };
-        copy[`player${player}`]++;
-        setScore(copy);
-        setGameDisable(true);
-        reject();
-      }
-
-      console.log(moves);
-      //checkDraw
-      if (moves === 8 && !gameDisable) {
-        setGameDisable(true);
-        reject();
-        setDraw(true);
-      }
-      resolve();
-    });
+  const checkDisabled = (e) => {
+    if (e || gameOver) return true;
+    else return false;
   };
+
+  useEffect(() => {
+    if (!!chancesPlayed.length) {
+      if (checkIfPlayerWon()) {
+        setScores((prev) => {
+          prev[`player${player}`]++;
+          return prev;
+        });
+        setGameOver(true);
+      } else {
+        if (chancesPlayed?.length === 9) {
+          setGameOver(true);
+          setDraw(true);
+        } else {
+          setPlayer((prev) => (prev === 1 ? 2 : 1));
+        }
+      }
+    }
+  }, [game]);
 
   const handleStartAgain = () => {
     setGame(initialValues);
+    setGameOver(false);
+    setDraw(false);
+    setChancesPlayed(0);
     setPlayer(1);
-    setGameDisable(false);
-    setMoves(0);
+  };
+
+  const handleRedo = () => {
+    const copy = [...game];
+    const copyChances = chancesPlayed;
+    copy[copyChances.pop()] = 0;
+    setChancesPlayed(copyChances);
+    // copy[chancesPlayed.pop()] = 0;
+    setGame(copy);
   };
 
   return (
     <>
-      <div className="container">
-        {gameDisable && (
-          <div className="float">
-            {!draw ? ` Player ${player} Won ` : `Match Draw`}
-          </div>
-        )}
-        <div className="score">
-          <span>Player1 Score:</span> {score.player1}
-        </div>
+      <div className="game-container">
+        <div className="scores">Player 1 Score : {scores.player1}</div>
         <div className="game">
-          {Object.keys(initialValues).map((e1, r) => (
-            <div key={e1} className="game-row">
-              {Object.keys(initialValues).map((e2, c) => (
-                <div key={e2}>
-                  <button
-                    className="btn-custom"
-                    onClick={() => handleSelect(r, c)}
-                    disabled={gameDisable}
-                  >
-                    {displayItem(game[r][c])}
-                  </button>
-                </div>
-              ))}
+          {game.map((e, i) => (
+            <div className="box" key={i}>
+              <button
+                className="btn-game"
+                onClick={() => handleSelect(i)}
+                disabled={checkDisabled(e)}
+              >
+                {!!game[i] && game[i]}
+              </button>
             </div>
           ))}
         </div>
-        <div className="score">
-          <span>Player2 Score:</span> {score.player2}
-        </div>
+
+        <div className="scores">Player 2 Score : {scores.player2}</div>
       </div>
-      {gameDisable && (
-        <div className="another-round">
-          <button onClick={handleStartAgain}>Go Another Round!</button>
+      {gameOver && (
+        <div className="game-result">
+          {!draw ? `Player ${player} Won` : `Game is Draw`}
         </div>
       )}
+      <div className="options">
+        <div>
+          <button
+            className="btn-options"
+            onClick={handleRedo}
+            disabled={gameOver}
+          >
+            Redo
+          </button>
+        </div>
+        <div>
+          <button
+            className="btn-options"
+            onClick={handleStartAgain}
+            disabled={!gameOver}
+          >
+            Go Again
+          </button>
+        </div>
+      </div>
     </>
   );
-}
+};
+
+export default TicTacToe;
