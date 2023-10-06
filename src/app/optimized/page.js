@@ -76,6 +76,15 @@ const OptimizedPage = () => {
     setPlayer(1);
   };
 
+  const handleRedo = () => {
+    const copy = [...game];
+    const copyChances = chancesPlayed;
+    copy[copyChances.pop()] = 0;
+    setChancesPlayed(copyChances);
+    // copy[chancesPlayed.pop()] = 0;
+    setGame(copy);
+  };
+
   return (
     <>
       <div className="game-container">
@@ -103,10 +112,20 @@ const OptimizedPage = () => {
       )}
       <div className="options">
         <div>
-          <button className="btn-options">Redo</button>
+          <button
+            className="btn-options"
+            onClick={handleRedo}
+            disabled={gameOver}
+          >
+            Redo
+          </button>
         </div>
         <div>
-          <button className="btn-options" onClick={handleStartAgain}>
+          <button
+            className="btn-options"
+            onClick={handleStartAgain}
+            disabled={!gameOver}
+          >
             Go Again
           </button>
         </div>
